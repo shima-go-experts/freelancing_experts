@@ -107,6 +107,7 @@
 
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import cors from "cors"
 
 export function middleware(req) {
   const { pathname } = req.nextUrl;
@@ -181,3 +182,5 @@ export const config = {
   matcher: ["/api/:path*"],
 };
     
+
+``
