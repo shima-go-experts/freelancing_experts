@@ -195,7 +195,7 @@ export function middleware(req) {
 
   const allowedOrigins = [
     "http://localhost:3000",
-    "https://your-frontend-domain.vercel.app",
+    "https://freelancer-website-fi8x.vercel.app",
   ];
 
   const origin = req.headers.get("origin");
