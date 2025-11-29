@@ -1,0 +1,103 @@
+// import { NextResponse } from "next/server";
+// import jwt from "jsonwebtoken";
+
+// export function middleware(req) {
+//   const { pathname } = req.nextUrl;
+
+//   // Public API routes (no auth required)
+//   const publicRoutes = [
+//     "/api/admin/login",
+//     "/api/client/login",
+//     "/api/freelancer/login",
+//     "/api/client/register",
+//     "/api/freelancer/register",
+//   ];
+
+//   if (publicRoutes.includes(pathname)) {
+//     return NextResponse.next();
+//   }
+
+//   const authHeader = req.headers.get("authorization");
+
+//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+//     return NextResponse.json({ message: "No token provided" }, { status: 401 });
+//   }
+
+//   const token = authHeader.split(" ")[1];
+
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+//     const reqHeaders = new Headers(req.headers);
+//     reqHeaders.set("userId", decoded.id);
+//     reqHeaders.set("role", decoded.role);
+
+//     return NextResponse.next({
+//       request: { headers: reqHeaders },
+//     });
+//   } catch (error) {
+//     return NextResponse.json(
+//       { message: "Invalid or expired token" },
+//       { status: 401 }
+//     );
+//   }
+// }
+
+// export const config = {
+//   matcher: ["/api/:path*"], // protect all API routes
+// };
+
+
+import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+
+export function middleware(req) {
+  const { pathname } = req.nextUrl;
+
+  // Public API routes (no auth required)
+  const publicRoutes = [
+    "/api/admin/login",
+    "/api/admin/register",
+    "/api/client/login",
+    "/api/client/register",
+    "/api/freelancer/login",
+    "/api/freelancer/register",
+  ];
+
+  // Allow public routes
+  if (publicRoutes.some((route) => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+  // Check for authorization header
+  const authHeader = req.headers.get("authorization");
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return NextResponse.json({ message: "No token provided" }, { status: 401 });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Forward user info in headers
+    const reqHeaders = new Headers(req.headers);
+    reqHeaders.set("userId", decoded.id);
+    reqHeaders.set("role", decoded.role);
+
+    return NextResponse.next({
+      request: { headers: reqHeaders },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Invalid or expired token" },
+      { status: 401 }
+    );
+  }
+}
+
+// Protect all API routes
+export const config = {
+  matcher: ["/api/:path*"],
+};
