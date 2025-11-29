@@ -1,12 +1,12 @@
-// /app/api/admin/change-password/route.js
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import connectDB from "@/app/helper/dbConnect";
-import changePass from "@/app/model/changePass"; // your model
+import dbConnect from "@/app/helper/dbConnect";
+import changePass from "@/app/model/changePass";
 
 export async function POST(req) {
   try {
-    await connectDB();
+    // FIXED name
+    await dbConnect();
 
     const { email, oldPassword, newPassword } = await req.json();
 
@@ -29,7 +29,7 @@ export async function POST(req) {
     const hashed = await bcrypt.hash(newPassword, 10);
 
     admin.password = hashed;
-    admin.changePassword = false; // mark as changed
+    admin.changePassword = false;
     await admin.save();
 
     return NextResponse.json({
