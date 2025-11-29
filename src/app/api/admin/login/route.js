@@ -105,7 +105,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // ❗ change later for production
+  "Access-Control-Allow-Origin": "http://localhost:3000", // ❗ change later for production
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
