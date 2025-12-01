@@ -2,26 +2,15 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
 export const config = {
-  matcher: ["/api/:path*"], 
+  matcher: ["/api/:path*"],
 };
 
 export default async function proxy(req) {
   const { pathname } = req.nextUrl;
 
-  // Allowed frontend domains
-  const allowedOrigins = [
-    "http://localhost:3000",
-    "https://freelancer-website-fi8x.vercel.app",
-  ];
-
-  const origin = req.headers.get("origin");
-
   // Add CORS headers
   const addCors = (res) => {
-    if (allowedOrigins.includes(origin)) {
-      res.headers.set("Access-Control-Allow-Origin", origin);
-    }
-
+    res.headers.set("Access-Control-Allow-Origin", "*");
     res.headers.set("Vary", "Origin");
     res.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
     res.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
