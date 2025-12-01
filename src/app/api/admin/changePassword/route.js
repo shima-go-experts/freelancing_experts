@@ -25,13 +25,15 @@ export async function POST(req) {
         { status: 404 } // Not Found
       );
     }
+    
+   
 
     // Check old password
     const isMatch = await bcrypt.compare(oldPassword, admin.password);
     if (!isMatch) {
       return NextResponse.json(
         { message: "Old password is incorrect" },
-        { status: 401 } // Unauthorized
+        { status: 401 }
       );
     }
 

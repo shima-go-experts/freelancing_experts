@@ -162,6 +162,7 @@
 //   }
 // }
 
+
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
@@ -220,7 +221,7 @@ if (publicRoutes.some((r) => r.test(pathname))) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    
     // Attach user data to headers
     const reqHeaders = new Headers(req.headers);
     reqHeaders.set("userId", decoded.id);
