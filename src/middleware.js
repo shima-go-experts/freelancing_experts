@@ -163,6 +163,7 @@
 // }
 
 
+
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
@@ -201,6 +202,10 @@ export default async function proxy(req) {
   /^\/api\/freelancer\/login/,
   /^\/api\/freelancer\/register/,
   /^\/api\/admin\/changePassword/,
+   /^\/api\/users\/usersdata/,
+    /^\/api\/userslogins\/loglogins/,
+     /^\/api\/projects\/addprojects/,
+      /^\/api\/workingclients\/activeclients/,
 ];
 
 if (publicRoutes.some((r) => r.test(pathname))) {
@@ -241,5 +246,4 @@ if (publicRoutes.some((r) => r.test(pathname))) {
     );
   }
 }
-//
-//
+
