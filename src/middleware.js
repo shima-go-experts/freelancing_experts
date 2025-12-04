@@ -250,25 +250,23 @@
 //   }
 // }
 
+
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-// Configure which API routes the middleware applies to
 export const config = {
   matcher: ["/api/:path*"],
 };
 
-// Allowed frontend origin (replace with your actual frontend URL)
-const FRONTEND_ORIGIN = "https://yourfrontend.com";
+const FRONTEND_ORIGIN = "*"; // Keep * for development, change to actual domain in production
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": FRONTEND_ORIGIN,
   "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  "Vary": "Origin",
+  Vary: "Origin",
 };
 
-// Helper to attach CORS headers
 const addCorsHeaders = (res) => {
   Object.entries(CORS_HEADERS).forEach(([key, value]) => {
     res.headers.set(key, value);
@@ -276,7 +274,7 @@ const addCorsHeaders = (res) => {
   return res;
 };
 
-// Define public routes that do NOT require authentication
+// ⛔ Public routes (NO AUTH NEEDED)
 const PUBLIC_ROUTES = [
   /^\/api\/admin\/login/,
   /^\/api\/admin\/register/,
@@ -285,23 +283,28 @@ const PUBLIC_ROUTES = [
   /^\/api\/freelancer\/login/,
   /^\/api\/freelancer\/register/,
   /^\/api\/admin\/changePassword/,
+
+  // ✅ Make categories public
   /^\/api\/admin\/categories/,
+
+  // ✅ Make subcategories public
+  /^\/api\/admin\/subcategories/,
 ];
 
 export default async function middleware(req) {
   const { pathname } = req.nextUrl;
 
-  // Handle OPTIONS preflight requests
+  // Handle preflight
   if (req.method === "OPTIONS") {
     return addCorsHeaders(new NextResponse(null, { status: 204 }));
   }
 
-  // Allow public routes to pass without authentication
+  // Allow public routes
   if (PUBLIC_ROUTES.some((r) => r.test(pathname))) {
     return addCorsHeaders(NextResponse.next());
   }
 
-  // Check for Authorization header
+  // Check Authorization header
   const authHeader = req.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return addCorsHeaders(
@@ -312,17 +315,14 @@ export default async function middleware(req) {
   const token = authHeader.split(" ")[1];
 
   try {
-    // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Role-based access: Example, admin-only routes
     if (pathname.startsWith("/api/admin") && decoded.role !== "admin") {
       return addCorsHeaders(
         NextResponse.json({ message: "Access denied: Admins only" }, { status: 403 })
       );
     }
 
-    // Attach decoded info to headers for downstream API handlers
     const reqHeaders = new Headers(req.headers);
     reqHeaders.set("userId", decoded.id);
     reqHeaders.set("role", decoded.role);
@@ -333,13 +333,11 @@ export default async function middleware(req) {
       })
     );
   } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return addCorsHeaders(
-        NextResponse.json({ message: "Token expired" }, { status: 401 })
-      );
-    }
     return addCorsHeaders(
-      NextResponse.json({ message: "Invalid token" }, { status: 401 })
+      NextResponse.json(
+        { message: err.name === "TokenExpiredError" ? "Token expired" : "Invalid token" },
+        { status: 401 }
+      )
     );
   }
 }
