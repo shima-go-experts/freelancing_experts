@@ -1,7 +1,7 @@
 // // Handles POST request to create a new Client.
 
 // import { NextResponse } from "next/server";
-// import dbConnect from "@/app/helper/dbConnect";
+// import connectDB from "@/app/helper/db";
 // import Client from "@/app/model/Client";
 // import { z } from 'zod';
 
@@ -15,7 +15,7 @@
 // });
 
 // export async function POST(req) {
-//     await dbConnect();
+//     await connectDB();
 
 //     try {
 //         const body = await req.json();
@@ -64,13 +64,12 @@
 // }
 
 
-
 // app/api/admin/clients/route.js
 import { NextResponse } from "next/server";
 import dbConnect from "@/app/helper/dbConnect";
 import Client from "@/app/model/Client";
 import { z } from "zod";
-import cloudinary from "@/app/utils/cloudinary"; // configured Cloudinary
+import cloudinary from "@/app/utils/cloudinary";
 
 // ======================= Validation Schema =======================
 const ClientValidationSchema = z.object({
@@ -99,13 +98,12 @@ export async function POST(req) {
 
   try {
     const contentType = req.headers.get("content-type") || "";
-
     let body = {};
 
     // ---------- Case 1: JSON ----------
     if (contentType.includes("application/json")) {
       body = await req.json();
-    }
+    } 
     // ---------- Case 2: Multipart Form Data ----------
     else if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
@@ -126,16 +124,22 @@ export async function POST(req) {
       const file = formData.get("photo");
       if (file && typeof file === "object") {
         const buffer = Buffer.from(await file.arrayBuffer());
-        const { secure_url } = await cloudinary.uploader.upload_stream(
-          { folder: "clients" },
-          (error, result) => {
-            if (error) throw new Error("Cloudinary upload failed: " + error.message);
-            return result;
-          }
-        );
-        body.photo = secure_url;
+
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "clients" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(buffer);
+        });
+
+        body.photo = result.secure_url;
       }
-    } else {
+    } 
+    else {
       return NextResponse.json(
         { success: false, message: "Unsupported content type" },
         { status: 415 }
@@ -175,6 +179,22 @@ export async function POST(req) {
       );
     }
 
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error", error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// ======================= GET Route =======================
+export async function GET(req) {
+  await dbConnect();
+
+  try {
+    const clients = await Client.find().sort({ createdAt: -1 });
+    return NextResponse.json({ success: true, data: clients }, { status: 200 });
+  } catch (error) {
+    console.error("Client GET Error:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error", error: error.message },
       { status: 500 }
