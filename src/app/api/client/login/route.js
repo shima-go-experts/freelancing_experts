@@ -15,6 +15,13 @@ export async function POST(request) {
       );
     }
 
+    if (client.status === "blocked") {
+      return Response.json(
+        { message: "Your account has been blocked. Please contact support." },
+        { status: 403 }
+      );
+    }
+
     const isMatch = await bcrypt.compare(password, client.password);
     if (!isMatch) {
       return Response.json(

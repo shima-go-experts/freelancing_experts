@@ -34,6 +34,15 @@ const FreelancerSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    status: {
+      type: String,
+      enum: ["active", "blocked"],
+      default: "active"
+    },
+    isVerified: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );

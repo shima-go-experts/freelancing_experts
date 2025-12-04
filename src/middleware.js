@@ -283,7 +283,7 @@ const PUBLIC_ROUTES = [
   /^\/api\/freelancer\/login/,
   /^\/api\/freelancer\/register/,
   /^\/api\/admin\/changePassword/,
-
+/^\/api\/client/,
   // ✅ Make categories public
   /^\/api\/admin\/categories/,
 

@@ -17,6 +17,13 @@ export async function POST(request) {
       );
     }
 
+    if (freelancer.status === "blocked") {
+      return Response.json(
+        { message: "Your account has been blocked. Please contact support." },
+        { status: 403 }
+      );
+    }
+
     // Compare password
     const isMatch = await bcrypt.compare(password, freelancer.password);
     if (!isMatch) {
