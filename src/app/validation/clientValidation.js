@@ -7,11 +7,13 @@ export const ClientValidationSchema = z.object({
     number: z.string(),
   }),
   country: z.string(),
+  
   kycDocuments: z.array(
     z.object({
       docType: z.string(),
       docUrl: z.string().url(),
     })
   ).optional(),
+   kycStatus: z.enum(["pending", "submitted", "verified", "rejected"]),
   photo: z.string().optional(),
 });
