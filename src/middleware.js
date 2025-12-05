@@ -289,6 +289,7 @@ const PUBLIC_ROUTES = [
 
   // ✅ Make subcategories public
   /^\/api\/admin\/subcategories/,
+  /^\/api\/admin\/projects/,
 ];
 
 export default async function middleware(req) {
