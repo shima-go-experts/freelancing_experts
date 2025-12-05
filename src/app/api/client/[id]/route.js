@@ -46,6 +46,7 @@ export async function PUT(req, { params }) {
         contactPerson: formData.get("contactPerson"),
         email: formData.get("email"),
         country: formData.get("country"),
+          kycStatus:formData.get("kycStatus"),
         phone: {
           countryCode: formData.get("phone[countryCode]"),
           number: formData.get("phone[number]"),
