@@ -41,16 +41,21 @@ export async function GET(request, context) {
 export async function PUT(req, context) {
   await dbConnect();
 
-  // Unwrap params for non-GET methods
-  const params = await context.params;  
+  const params = await context.params;
   const { id } = params;
 
   if (!id) {
-    return NextResponse.json({ success: false, message: "ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, message: "ID is required" },
+      { status: 400 }
+    );
   }
 
   const body = await req.json();
-  const { isVerified } = body;
+
+  // Convert to real boolean
+  const isVerified =
+    body.isVerified === true || body.isVerified === "true";
 
   const updated = await Freelancer.findByIdAndUpdate(
     id,
@@ -62,7 +67,10 @@ export async function PUT(req, context) {
   );
 
   if (!updated) {
-    return NextResponse.json({ success: false, message: "Freelancer not found" }, { status: 404 });
+    return NextResponse.json(
+      { success: false, message: "Freelancer not found" },
+      { status: 404 }
+    );
   }
 
   return NextResponse.json({ success: true, data: updated }, { status: 200 });
