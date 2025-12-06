@@ -38,37 +38,32 @@ export async function GET(request, context) {
     );
   }
 }
+export async function PUT(req, context) {
+  await dbConnect();
 
-export async function PUT(req, { params }) {
-  try {
-    await dbConnect();
+  // Unwrap params for non-GET methods
+  const params = await context.params;  
+  const { id } = params;
 
-    const { id } = params;
-    const body = await req.json();
-
-    const { isVerified } = body;
-
-    const updated = await Freelancer.findByIdAndUpdate(
-      id,
-      {
-        isVerified: isVerified,
-        status: isVerified ? "active" : "inactive",
-      },
-      { new: true }
-    );
-
-    if (!updated) {
-      return NextResponse.json(
-        { message: "Freelancer not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ success: true, data: updated });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+  if (!id) {
+    return NextResponse.json({ success: false, message: "ID is required" }, { status: 400 });
   }
+
+  const body = await req.json();
+  const { isVerified } = body;
+
+  const updated = await Freelancer.findByIdAndUpdate(
+    id,
+    {
+      isVerified: isVerified,
+      status: isVerified ? "active" : "inactive",
+    },
+    { new: true }
+  );
+
+  if (!updated) {
+    return NextResponse.json({ success: false, message: "Freelancer not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ success: true, data: updated }, { status: 200 });
 }
