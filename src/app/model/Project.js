@@ -34,6 +34,45 @@
 //   mongoose.model("Project", ProjectSchema);
 
 
+
+// import mongoose from "mongoose";
+
+// const ProjectSchema = new mongoose.Schema(
+//   {
+//     title: { type: String, required: true },
+//     description: { type: String, required: true },
+
+//     clientId: { type: mongoose.Schema.Types.ObjectId, ref: "Client", required: true },
+
+//     organizationId: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "Organization",
+//       required: true,
+//     },
+
+//     freelancerId: { type: mongoose.Schema.Types.ObjectId, ref: "Freelancer", default: null },
+
+//     budget: {
+//       amount: { type: Number, required: true },
+//       type: { type: String, enum: ["fixed", "hourly"], default: "fixed" },
+//     },
+
+//     startDate: { type: Date, default: null },
+//     endDate: { type: Date, default: null },
+
+//     status: {
+//       type: String,
+//       enum: ["pending", "approved", "in-progress", "completed", "cancelled"],
+//       default: "pending",
+//       index: true,
+//     },
+//   },
+//   { timestamps: true }
+// );
+
+// export default mongoose.models.Project || mongoose.model("Project", ProjectSchema);
+
+
 import mongoose from "mongoose";
 
 const ProjectSchema = new mongoose.Schema(
@@ -41,7 +80,11 @@ const ProjectSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
 
-    clientId: { type: mongoose.Schema.Types.ObjectId, ref: "Client", required: true },
+    clientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Client",
+      required: true,
+    },
 
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -49,11 +92,19 @@ const ProjectSchema = new mongoose.Schema(
       required: true,
     },
 
-    freelancerId: { type: mongoose.Schema.Types.ObjectId, ref: "Freelancer", default: null },
+    freelancerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Freelancer",
+      default: null,
+    },
 
     budget: {
       amount: { type: Number, required: true },
-      type: { type: String, enum: ["fixed", "hourly"], default: "fixed" },
+      type: {
+        type: String,
+        enum: ["fixed", "hourly"],
+        default: "fixed",
+      },
     },
 
     startDate: { type: Date, default: null },
@@ -61,12 +112,22 @@ const ProjectSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "approved", "in-progress", "completed", "cancelled"],
+      enum: ["pending", "approved", "in-progress", "completed", "cancelled","rejected"],
       default: "pending",
       index: true,
+    },
+
+    // ✅ Added for verification system
+    isVerified: { type: Boolean, default: false, index: true },
+    verifiedAt: { type: Date, default: null },
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      default: null,
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Project || mongoose.model("Project", ProjectSchema);
+export default mongoose.models.Project ||
+  mongoose.model("Project", ProjectSchema);

@@ -94,6 +94,7 @@ export async function PUT(req, { params }) {
     }
 
     const updatedClient = await Client.findByIdAndUpdate(
+
       clientId,
       { $set: validation.data },
       { new: true, runValidators: true }
@@ -102,12 +103,14 @@ export async function PUT(req, { params }) {
     if (!updatedClient) {
       return NextResponse.json(
         { success: false, message: "Client not found" },
+        
         { status: 404 }
       );
     }
 
     return NextResponse.json(
       { success: true, data: updatedClient },
+
       { status: 200 }
     );
 

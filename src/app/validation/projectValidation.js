@@ -10,18 +10,31 @@
 
 import { z } from "zod";
 
-export const ProjectValidation = z.object({
-  title: z.string().min(3),
-  description: z.string().min(10),
+export const ProjectValidationSchema = z.object({
+  title: z.string().min(3, "Title is required"),
+  description: z.string().min(10, "Description is required"),
 
-  clientId: z.string().min(1),
-  organizationId: z.string().min(1),
+  clientId: z.string().min(1, "clientId is required"),
+  organizationId: z.string().min(1, "organizationId is required"),
+  freelancerId: z.string().optional(),
 
   budget: z.object({
-    amount: z.number().min(1),
+    amount: z.number().min(1, "Budget amount is required"),
     type: z.enum(["fixed", "hourly"]).default("fixed"),
   }),
 
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  startDate: z.string().optional().nullable(),
+  endDate: z.string().optional().nullable(),
+
+  status: z.enum([
+    "pending",
+    "approved",
+    "in-progress",
+    "completed",
+    "cancelled",
+  ]).default("pending"),
+
+  isVerified: z.boolean().optional(),
+  verifiedAt: z.string().optional(),
+  verifiedBy: z.string().optional(),
 });

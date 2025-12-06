@@ -280,10 +280,14 @@ const PUBLIC_ROUTES = [
   /^\/api\/admin\/register/,
   /^\/api\/client\/login/,
   /^\/api\/client\/register/,
-  /^\/api\/freelancer\/login/,
-  /^\/api\/freelancer\/register/,
+  /^\/api\/Freelancer\/login/,
+  /^\/api\/Freelancer\/register/,
+  /^\/api\/Freelancer\/profile/,
+  /^\/api\/Organization\/register/,
+   /^\/api\/Organization\/login/,
   /^\/api\/admin\/changePassword/,
 /^\/api\/client/,
+/^\/api\/projects/,
   // ✅ Make categories public
   /^\/api\/admin\/categories/,
 
