@@ -1,20 +1,22 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/app/helper/dbConnect";
-import Freelancer from "@/app/model/Freelancer";
+import Organisation from "@/app/model/Organisation";
 
+// -------------------------
+// GET ALL ORGANIZATIONS
+// -------------------------
 export async function GET() {
   try {
     await dbConnect();
 
-    // Return complete freelancer info except password
-    const freelancers = await Freelancer.find()
+    const organisations = await Organisation.find()
       .select(
-        "name email phone gender country skills status isVerified kycDocuments createdAt"
+        "registrationNumber name email phone address contactPerson status isVerified kyc.createdAt kyc.status kyc.documents kyc.verifiedAt createdAt updatedAt"
       )
       .sort({ createdAt: -1 });
 
     return NextResponse.json(
-      { success: true, data: freelancers },
+      { success: true, data: organisations },
       { status: 200 }
     );
   } catch (error) {
