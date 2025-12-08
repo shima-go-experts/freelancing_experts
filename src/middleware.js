@@ -280,6 +280,7 @@ const PUBLIC_ROUTES = [
   /^\/api\/admin\/register/,
   /^\/api\/client\/login/,
   /^\/api\/client\/register/,
+   /^\/api\/users\/register/,
   /^\/api\/Freelancer\/login/,
   /^\/api\/Freelancer\/register/,
   /^\/api\/Freelancer\/profile/,
