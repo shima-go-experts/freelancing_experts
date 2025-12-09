@@ -247,11 +247,42 @@ export async function POST(req) {
 
     const form = await req.formData();
 
+
+    
+
     // Basic organisation fields
      const name = form.get("name");
     const businessEmail = form.get("businessEmail");
+
+// Duplicate email check
+const existingEmail = await Organisation.findOne({ businessEmail }).session(session);
+if (existingEmail) {
+  await session.abortTransaction();
+  session.endSession();
+  return NextResponse.json({
+    success: false,
+    message: `Business email "${businessEmail}" already exists.`,
+  }, { status: 400 });
+}
+
+
+
     const typeOfOrganisation = form.get("typeOfOrganisation");
     const registrationNumber = form.get("registrationNumber") || null;
+
+    // Check if registrationNumber already exists
+if (registrationNumber) {
+  const existingOrg = await Organisation.findOne({ registrationNumber }).session(session);
+  if (existingOrg) {
+    await session.abortTransaction();
+    session.endSession();
+    return NextResponse.json({
+      success: false,
+      message: `Registration number "${registrationNumber}" already exists.`,
+    }, { status: 400 });
+  }
+}
+
 
     // Required checks
     if (!name || !businessEmail || !typeOfOrganisation) {
@@ -363,5 +394,25 @@ export async function POST(req) {
     await session.abortTransaction();
     session.endSession();
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    await dbConnect();
+
+    const organisations = await Organisation.find().sort({ createdAt: -1 });
+
+    return NextResponse.json({
+      success: true,
+      message: "All organisations fetched successfully",
+      data: organisations,
+    });
+
+  } catch (err) {
+    return NextResponse.json(
+      { success: false, message: err.message },
+      { status: 500 }
+    );
   }
 }
