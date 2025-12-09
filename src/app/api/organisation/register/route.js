@@ -1,58 +1,8 @@
-// import { dbConnect } from "@/app/helper/dbConnect";
-// import Organisation from "@/app/model/Organisation";
-// import bcrypt from "bcryptjs";
-
-// export async function POST(request) {
-//   try {
-//     await dbConnect();
-
-//     const { registrationNumber, name, email, phone, password } =
-//       await request.json();
-
-//     // Check if email or registration number already exists
-//     const exists = await Organisation.findOne({
-//       $or: [{ email }, { registrationNumber }],
-//     });
-
-//     if (exists) {
-//       return Response.json(
-//         { message: "Organisation already registered" },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Hash password
-//     const salt = await bcrypt.genSalt(10);
-//     const hashedPassword = await bcrypt.hash(password, salt);
-
-//     // Create organisation
-//     const newOrg = await Organisation.create({
-//       registrationNumber,
-//       name,
-//       email,
-//       phone,
-//       password: hashedPassword,
-//     });
-
-//     return Response.json(
-//       { message: "Organisation registered", data: newOrg },
-//       { status: 201 }
-//     );
-//   } catch (error) {
-//     return Response.json(
-//       { message: "Server error", error: error.message },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-
 // import { NextResponse } from "next/server";
-// import { uploadBufferToCloudinary } from "@/utils/uploadToCloudinary";
-// import { upload } from "@/utils/multer";
-// import Organisation from "@/app/model/Organisation";
 // import dbConnect from "@/app/helper/dbConnect";
-// import bcrypt from "bcryptjs";
+// import OrganisationKyc from "@/app/model/OrganisationKyc";
+// import Organisation from "@/app/model/Organisation";
+// import { uploadFile } from "@/app/utils/cloudinary";
 
 // export const config = {
 //   api: {
@@ -60,162 +10,358 @@
 //   },
 // };
 
-// // Middleware wrapper for multer
-// function runMiddleware(req, fn) {
-//   return new Promise((resolve, reject) => {
-//     fn(req, {}, (result) => {
-//       if (result instanceof Error) return reject(result);
-//       return resolve(result);
-//     });
-//   });
-// }
+// // -------------------------------
+// // Helper: Upload single image
+// // -------------------------------
+// const uploadSingle = async (file, folder) => {
+//   if (!file) return { url: null, public_id: null };
+//   const upload = await uploadFile(file, folder);
+//   return { url: upload.url, public_id: upload.public_id };
+// };
 
+// // -------------------------------
+// // Helper: Upload front + back
+// // -------------------------------
+// const uploadDouble = async (frontFile, backFile, folder) => {
+//   const front = await uploadSingle(frontFile, folder);
+//   const back = await uploadSingle(backFile, folder);
+
+//   return {
+//     front: front.url,
+//     back: back.url,
+//     front_public_id: front.public_id,
+//     back_public_id: back.public_id,
+//   };
+// };
+
+// // ---------------------------------------------------
+// // MAIN KYC SUBMISSION / UPDATE ROUTE
+// // ---------------------------------------------------
 // export async function POST(req) {
 //   try {
 //     await dbConnect();
 
-//     // Accept logo, 10 photos, and KYC documents
-//     await runMiddleware(
-//       req,
-//       upload.fields([
-//         { name: "logo", maxCount: 1 },
-//         { name: "organizationPhotos", maxCount: 10 },
-//         { name: "kycDocuments", maxCount: 10 } // NEW
-//       ])
-//     );
+//     const formData = await req.formData();
 
-//     const formData = req.body;
-//     const files = req.files;
+//     // ------------------------------
+//     // BASIC ORGANISATION INFO
+//     // ------------------------------
+//     const typeOfOrganisation = formData.get("typeOfOrganisation");
+//     const businessEmail = formData.get("businessEmail");
+//     const registrationNumber = formData.get("registrationNumber") || null;
+//     const status = formData.get("status") || "pending";
+//     const rejectionReason = formData.get("rejectionReason") || null;
 
-//     const {
+//     // Employer Address
+//     const employerAddress = {
+//       addressLine1: formData.get("addressLine1"),
+//       addressLine2: formData.get("addressLine2") || "",
+//       city: formData.get("city"),
+//       state: formData.get("state"),
+//       country: formData.get("country"),
+//       pincode: formData.get("pincode"),
+//     };
+
+//     // ------------------------------
+//     // CREATE ORGANISATION FIRST
+//     // ------------------------------
+//     const organisation = await Organisation.create({
+//       typeOfOrganisation,
+//       businessEmail,
 //       registrationNumber,
-//       name,
-//       email,
-//       companyLandlineNo,
-//       password,
-//       officeWebsiteLink,
-//       linkedinLink,
-//       kycStatus, // NEW
-//       kycTypes // CSV List (ex: "GST,Pan,Udyam") → frontend will send this
-//     } = formData;
+//       employerAddress,
+//       kycStatus: "submitted",
+//     });
 
-//     // ------------------------------------------
-//     // Validate duplicate email
-//     // ------------------------------------------
-//     const exists = await Organisation.findOne({ email });
-//     if (exists) {
+//     const organisationId = organisation._id; // NEW ID GENERATED
+
+//     // --------------------------------
+//     // KYC NUMBERS
+//     // --------------------------------
+//     const directorPanNumber = formData.get("directorPanNumber") || null;
+//     const directorDlNumber = formData.get("directorDlNumber") || null;
+//     const directorAadharNumber = formData.get("directorAadharNumber") || null;
+//     const directorPassportNumber = formData.get("directorPassportNumber") || null;
+
+//     // --------------------------------
+//     // REQUIRED PAN UPLOAD
+//     // --------------------------------
+//     const directorPanFront = formData.get("directorPanFront");
+//     const directorPanBack = formData.get("directorPanBack");
+
+//     if (!directorPanFront || !directorPanBack) {
 //       return NextResponse.json(
-//         { success: false, message: "Email already registered" },
+//         { success: false, message: "Director PAN (front & back) required" },
 //         { status: 400 }
 //       );
 //     }
 
-//     // ------------------------------------------
-//     // Hash password
-//     // ------------------------------------------
-//     const hashedPassword = await bcrypt.hash(password, 10);
+//     // --------------------------------
+//     // OPTIONAL FILES
+//     // --------------------------------
+//     const directorDlFront = formData.get("directorDlFront");
+//     const directorDlBack = formData.get("directorDlBack");
 
-//     // ------------------------------------------
-//     // Upload Logo
-//     // ------------------------------------------
-//     let logoData = {};
-//     if (files?.logo?.length > 0) {
-//       const uploadedLogo = await uploadBufferToCloudinary(
-//         files.logo[0].buffer,
-//         "organisation/logo"
-//       );
+//     const directorAadharFront = formData.get("directorAadharFront");
+//     const directorAadharBack = formData.get("directorAadharBack");
 
-//       logoData = {
-//         url: uploadedLogo.secure_url,
-//         public_id: uploadedLogo.public_id,
-//       };
-//     }
+//     const directorPassportFront = formData.get("directorPassportFront");
+//     const directorPassportBack = formData.get("directorPassportBack");
 
-//     // ------------------------------------------
-//     // Upload Multiple Organization Photos
-//     // ------------------------------------------
-//     let orgPhotos = [];
+//     const logoFile = formData.get("logo");
+//     const addressProofFile = formData.get("addressProof");
 
-//     if (files?.organizationPhotos?.length > 0) {
-//       for (const photo of files.organizationPhotos) {
-//         const uploadedPhoto = await uploadBufferToCloudinary(
-//           photo.buffer,
-//           "organisation/photos"
-//         );
-
-//         orgPhotos.push({
-//           url: uploadedPhoto.secure_url,
-//           public_id: uploadedPhoto.public_id,
+//     // --------------------------------
+//     // COMPANY PHOTOS (MAX 10)
+//     // --------------------------------
+//     const companyPhotos = [];
+//     for (let i = 0; i < 10; i++) {
+//       const photo = formData.get(`companyPhoto${i}`);
+//       if (photo && typeof photo === "object") {
+//         const uploaded = await uploadSingle(photo, "kyc/company/photos");
+//         companyPhotos.push({
+//           url: uploaded.url,
+//           public_id: uploaded.public_id,
 //           uploadedAt: new Date(),
 //         });
 //       }
 //     }
 
-//     // ------------------------------------------
-//     // Upload KYC DOCUMENTS
-//     // ------------------------------------------
-//     let kycDocs = [];
-
-//     if (files?.kycDocuments?.length > 0) {
-//       const kycTypesArray = kycTypes?.split(",") || [];
-
-//       for (let i = 0; i < files.kycDocuments.length; i++) {
-//         const doc = files.kycDocuments[i];
-
-//         const uploadedDoc = await uploadBufferToCloudinary(
-//           doc.buffer,
-//           "organisation/kyc"
-//         );
-
-//         kycDocs.push({
-//           type: kycTypesArray[i] || "Document",
-//           url: uploadedDoc.secure_url,
-//           public_id: uploadedDoc.public_id,
-//           uploadedAt: new Date(),
-//         });
-//       }
-//     }
-
-//     // ------------------------------------------
-//     // CREATE ORGANISATION ENTRY
-//     // ------------------------------------------
-//     const newOrg = await Organisation.create({
-//       registrationNumber,
-//       name,
-//       email,
-//       companyLandlineNo,
-//       password: hashedPassword,
-//       logo: logoData,
-//       officeWebsiteLink,
-//       linkedinLink,
-//       organizationPhotos: orgPhotos,
-
-//       // NEW
-//       kyc: {
-//         status: kycStatus || "pending",
-//         documents: kycDocs,
-//         verifiedAt: null,
-//       },
-
-//       // NEW
-//       isVerified: false,
-//       status: "inactive",
-//     });
-
-//     return NextResponse.json(
-//       {
-//         success: true,
-//         message: "Organisation registered successfully",
-//         data: newOrg,
-//       },
-//       { status: 201 }
+//     // --------------------------------
+//     // UPLOAD ALL DOCUMENTS
+//     // --------------------------------
+//     const directorPan = await uploadDouble(
+//       directorPanFront,
+//       directorPanBack,
+//       "kyc/director/pan"
 //     );
+
+//     const directorDl =
+//       directorDlFront && directorDlBack
+//         ? await uploadDouble(directorDlFront, directorDlBack, "kyc/director/dl")
+//         : { front: null, back: null, front_public_id: null, back_public_id: null };
+
+//     const directorAadhar =
+//       directorAadharFront && directorAadharBack
+//         ? await uploadDouble(
+//             directorAadharFront,
+//             directorAadharBack,
+//             "kyc/director/aadhar"
+//           )
+//         : { front: null, back: null, front_public_id: null, back_public_id: null };
+
+//     const directorPassport =
+//       directorPassportFront && directorPassportBack
+//         ? await uploadDouble(
+//             directorPassportFront,
+//             directorPassportBack,
+//             "kyc/director/passport"
+//           )
+//         : { front: null, back: null, front_public_id: null, back_public_id: null };
+
+//     const logo =
+//       logoFile && typeof logoFile === "object"
+//         ? await uploadSingle(logoFile, "kyc/logo")
+//         : null;
+
+//     const employerAddressProof =
+//       addressProofFile && typeof addressProofFile === "object"
+//         ? await uploadSingle(addressProofFile, "kyc/addressProof")
+//         : null;
+
+//     // --------------------------------
+//     // SAVE KYC DETAILS INTO KYC TABLE
+//     // --------------------------------
+//     const kycPayload = {
+//       // organisationId,
+//       typeOfOrganisation,
+//       businessEmail,
+//       registrationNumber,
+//       employerAddress,
+//       directorPan: { ...directorPan, number: directorPanNumber },
+//       directorDl: { ...directorDl, number: directorDlNumber },
+//       directorAadhar: { ...directorAadhar, number: directorAadharNumber },
+//       directorPassport: { ...directorPassport, number: directorPassportNumber },
+//       logo,
+//       companyPhotos,
+//       employerAddressProof,
+//       status,
+//       rejectionReason,
+//     };
+
+//     const kycRecord = await OrganisationKyc.create(kycPayload);
+
+//     // --------------------------------
+//     // RESPONSE
+//     // --------------------------------
+//     return NextResponse.json({
+//       success: true,
+//       message: "Organisation registered + KYC submitted successfully",
+//       data: {
+//         organisation,
+//         kyc: kycRecord,
+//       },
+//     });
 //   } catch (error) {
+//     console.error("KYC Registration Error:", error);
 //     return NextResponse.json(
-//       { success: false, message: "Server Error", error: error.message },
+//       { success: false, message: error.message },
 //       { status: 500 }
 //     );
 //   }
 // }
 
 
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import dbConnect from "@/app/helper/dbConnect";
+import Organisation from "@/app/model/Organisation";
+import { uploadFile } from "@/app/utils/cloudinary";
+
+// Upload single file
+const uploadSingle = async (file, folder) => {
+  if (!file) return null;
+  const upload = await uploadFile(file, folder);
+  return { url: upload.url, public_id: upload.public_id };
+};
+
+// Upload front + back
+const uploadDouble = async (front, back, folder) => {
+  const f = front ? await uploadSingle(front, folder) : null;
+  const b = back ? await uploadSingle(back, folder) : null;
+
+  return {
+    front: f?.url || null,
+    back: b?.url || null,
+    front_public_id: f?.public_id || null,
+    back_public_id: b?.public_id || null
+  };
+};
+
+export async function POST(req) {
+  let session;
+  try {
+    await dbConnect();
+    session = await mongoose.startSession();
+    session.startTransaction();
+
+    const form = await req.formData();
+
+    // Basic organisation fields
+     const name = form.get("name");
+    const businessEmail = form.get("businessEmail");
+    const typeOfOrganisation = form.get("typeOfOrganisation");
+    const registrationNumber = form.get("registrationNumber") || null;
+
+    // Required checks
+    if (!name || !businessEmail || !typeOfOrganisation) {
+      return NextResponse.json(
+        { success: false, message: "Name, businessEmail & typeOfOrganisation are required." },
+        { status: 400 }
+      );
+    }
+
+    // Address
+    const employerAddress = {
+      addressLine1: form.get("addressLine1"),
+      addressLine2: form.get("addressLine2") || "",
+      city: form.get("city"),
+      state: form.get("state"),
+      country: form.get("country"),
+      pincode: form.get("pincode"),
+    };
+
+    // Mandatory uploads
+    const directorPan = await uploadDouble(
+      form.get("directorPanFront"),
+      form.get("directorPanBack"),
+      "kyc/director/pan"
+    );
+
+    const logo = await uploadSingle(form.get("logo"), "kyc/logo");
+    const employerAddressProof = await uploadSingle(form.get("addressProof"), "kyc/addressProof");
+
+    if (!directorPan.front || !directorPan.back) {
+      return NextResponse.json(
+        { success: false, message: "Director PAN front & back required" },
+        { status: 400 }
+      );
+    }
+
+    if (!logo) {
+      return NextResponse.json(
+        { success: false, message: "Company logo required" },
+        { status: 400 }
+      );
+    }
+
+    if (!employerAddressProof) {
+      return NextResponse.json(
+        { success: false, message: "Employer address proof required" },
+        { status: 400 }
+      );
+    }
+
+    // Optional docs
+    const directorDl = await uploadDouble(
+      form.get("directorDlFront"),
+      form.get("directorDlBack"),
+      "kyc/director/dl"
+    );
+
+    const directorAadhar = await uploadDouble(
+      form.get("directorAadharFront"),
+      form.get("directorAadharBack"),
+      "kyc/director/aadhar"
+    );
+
+    const directorPassport = await uploadDouble(
+      form.get("directorPassportFront"),
+      form.get("directorPassportBack"),
+      "kyc/director/passport"
+    );
+
+    // Company photos
+    const companyPhotos = [];
+    for (const key of form.keys()) {
+      if (key.startsWith("companyPhoto")) {
+        const uploaded = await uploadSingle(form.get(key), "kyc/company/photos");
+        companyPhotos.push(uploaded);
+      }
+    }
+
+    // Final payload saved into Organisation
+    const payload = {
+      name,
+      businessEmail,
+      typeOfOrganisation,
+      registrationNumber,
+      employerAddress,
+      directorPan,
+      directorDl,
+      directorAadhar,
+      directorPassport,
+      logo,
+      employerAddressProof,
+      companyPhotos,
+      status: "pending",
+      rejectionReason: null
+    };
+
+    const org = await Organisation.create([payload], { session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return NextResponse.json({
+      success: true,
+      message: "Organisation KYC submitted successfully",
+      data: org[0],
+    });
+
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+  }
+}
