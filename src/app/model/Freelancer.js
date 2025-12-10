@@ -54,80 +54,134 @@
 
 
 
+// import mongoose from "mongoose";
+
+// const FreelancerSchema = new mongoose.Schema(
+//   {
+//     name: {
+//       type: String,
+//       required: true,
+//     },
+
+//     email: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//     },
+
+//     phone: {
+//       type: String,
+//       required: true,
+//     },
+
+//     gender: {
+//       type: String,
+//       enum: ["male", "female", "other"],
+//       required: true,
+//     },
+
+//     country: {
+//       type: String,
+//       default: "",
+//     },
+
+//     skills: {
+//       type: [String],
+//       required: true,
+//     },
+
+//     password: {
+//       type: String,
+//       required: true,
+//       minlength: 6,
+//     },
+
+//     status: {
+//       type: String,
+//       enum: ["active", "blocked","inactive"],
+//       default: "active",
+//     },
+
+//     isVerified: {
+//       type: Boolean,
+//       default: false,
+//     },
+
+//     // ⭐ KYC DOCUMENTS
+//     kycDocuments: [
+//       {
+//         type: {
+//           type: String, // Aadhaar / PAN / Passport
+//           required: true,
+//         },
+//         url: {
+//           type: String,
+//           required: true,
+//         },
+//         verified: {
+//           type: Boolean,
+//           default: false,
+//         },
+//       },
+//     ],
+//   },
+//   { timestamps: true }
+// );
+
+// export default mongoose.models.Freelancer ||
+//   mongoose.model("Freelancer", FreelancerSchema);
+// //
+
+
+
 import mongoose from "mongoose";
 
-const FreelancerSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
+const FreelancerProfileSchema = new mongoose.Schema({
 
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+  // =========================
+  // BASIC PROFILE
+  // =========================
+  full_name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, lowercase: true, trim: true },
+  freelancer_photo: { type: String, trim: true },
 
-    phone: {
-      type: String,
-      required: true,
-    },
+  bio: { type: String, trim: true },
+  skills: [{ type: String, trim: true }],
+  experience_years: { type: Number, default: 0, min: 0 },
+  hourly_rate: { type: Number, default: 0, min: 0 },
 
-    gender: {
-      type: String,
-      enum: ["male", "female", "other"],
-      required: true,
-    },
+  linkedin_url: { type: String, trim: true },
+  portfolio_website: { type: String, trim: true },
+  full_address: { type: String, trim: true },
 
-    country: {
-      type: String,
-      default: "",
-    },
+  // =========================
+  // KYC DOCUMENTS
+  // =========================
+  aadhar_or_passport_number: { type: String, trim: true },
+  aadhar_or_passport_front: { type: String, required: true },
+  aadhar_or_passport_back: { type: String, required: true },
 
-    skills: {
-      type: [String],
-      required: true,
-    },
+  pan_or_dl_number: { type: String, trim: true },
+  pan_or_driving_license_front: { type: String, required: true },
+  pan_or_driving_license_back: { type: String, required: true },
 
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-    },
+  selfie_url: { type: String, required: true },
 
-    status: {
-      type: String,
-      enum: ["active", "blocked","inactive"],
-      default: "active",
-    },
+  experience_certificates: { type: [String], required: true },
 
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-
-    // ⭐ KYC DOCUMENTS
-    kycDocuments: [
-      {
-        type: {
-          type: String, // Aadhaar / PAN / Passport
-          required: true,
-        },
-        url: {
-          type: String,
-          required: true,
-        },
-        verified: {
-          type: Boolean,
-          default: false,
-        },
-      },
-    ],
+  kyc_status: {
+    type: String,
+    enum: ["Pending", "Verified", "Rejected"],
+    default: "Pending"
   },
-  { timestamps: true }
-);
 
-export default mongoose.models.Freelancer ||
-  mongoose.model("Freelancer", FreelancerSchema);
-//
+  // =========================
+  // RATINGS
+  // =========================
+  rating_average: { type: Number, default: 0, min: 0, max: 5 },
+  rating_count: { type: Number, default: 0, min: 0 }
+
+}, { timestamps: true });
+
+export default mongoose.models.FreelancerProfile ||
+  mongoose.model("FreelancerProfile", FreelancerProfileSchema);
