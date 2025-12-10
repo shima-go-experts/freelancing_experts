@@ -235,7 +235,113 @@
 
 
 
-import mongoose from "mongoose";
+
+// import mongoose from "mongoose";
+
+// // ----------------------------
+// // Sub-schema for Documents
+// // ----------------------------
+// const DocumentSchema = new mongoose.Schema({
+//   front: { type: String, required: true, trim: true },
+//   back: { type: String, required: true, trim: true },
+//   front_public_id: { type: String, required: true, trim: true },
+//   back_public_id: { type: String, required: true, trim: true }
+// });
+
+// // ----------------------------
+// // Sub-schema for optional Documents
+// // ----------------------------
+
+// const OptionalDocumentSchema = new mongoose.Schema({
+//   front: { type: String, trim: true },
+//   back: { type: String, trim: true },
+//   front_public_id: { type: String, trim: true },
+//   back_public_id: { type: String, trim: true }
+// });
+
+// // ----------------------------
+// // Sub-schema for Address
+// // ----------------------------
+// const AddressSchema = new mongoose.Schema({
+//   addressLine1: { type: String, required: true, trim: true },
+//   addressLine2: { type: String, trim: true },
+//   city: { type: String, required: true, trim: true },
+//   state: { type: String, required: true, trim: true },
+//   country: { type: String, required: true, trim: true },
+//   pincode: { type: String, required: true, trim: true }
+// });
+
+// // ----------------------------
+// // Sub-schema for Images
+// // ----------------------------
+// const ImageSchema = new mongoose.Schema({
+//   url: { type: String, required: true, trim: true },
+//   public_id: { type: String, required: true, trim: true },
+//   uploadedAt: { type: Date, default: Date.now }
+// });
+
+// // ----------------------------
+// // Main Organisation + KYC Schema
+// // ----------------------------
+// const OrganisationSchema = new mongoose.Schema({
+//   // Organisation Info
+//   CompanyName: { type: String, required: true, trim: true },
+//   businessEmail: { 
+//     type: String, 
+//     required: true, 
+//     trim: true,
+//     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Invalid email format"]
+//   },
+//   typeOfOrganisation: {
+//     type: String,
+//     enum: ["private", "public", "proprietory", "partnership", "startup", "ltp", "pvt ltd", "opc pvt ltd", "other"],
+//     required: true
+//   },
+//   registrationNumber: { 
+//     type: String, 
+//     trim: true,
+//     required: function() {
+//       // Conditionally required for certain organisation types
+//       return ["pvt ltd", "opc pvt ltd", "private"].includes(this.typeOfOrganisation);
+//     }
+//   },
+
+//   // KYC Documents
+//   directorPan: { type: DocumentSchema, required: true },
+//   directorAadhar: { type: OptionalDocumentSchema },
+//   directorDl: { type: OptionalDocumentSchema },
+//   directorPassport: { type: OptionalDocumentSchema },
+
+//   // Company Logo (required for KYC)
+//   logo: { type: ImageSchema, required: true },
+
+//   // Company Photos (Max 10)
+//   companyPhotos: { 
+//     type: [ImageSchema],
+//     validate: {
+//       validator: val => val.length <= 10,
+//       message: "Maximum 10 company photos allowed"
+//     }
+//   },
+
+//   // Employer Address
+//   employerAddress: { type: AddressSchema, required: true },
+
+//   // Employer Address Proof (required for KYC)
+//   employerAddressProof: { type: ImageSchema, required: true },
+
+//   // Status & Rejection Reason
+//   status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+//   rejectionReason: { type: String, default: null }
+
+// }, { timestamps: true });
+
+// // Index for quick lookup of pending KYC
+// OrganisationSchema.index({ status: 1 });
+
+// export default mongoose.models.Organisation || mongoose.model("Organisation", OrganisationSchema);
+
+ import mongoose from "mongoose";
 
 // ----------------------------
 // Sub-schema for Documents
@@ -250,7 +356,6 @@ const DocumentSchema = new mongoose.Schema({
 // ----------------------------
 // Sub-schema for optional Documents
 // ----------------------------
-
 const OptionalDocumentSchema = new mongoose.Schema({
   front: { type: String, trim: true },
   back: { type: String, trim: true },
@@ -283,14 +388,16 @@ const ImageSchema = new mongoose.Schema({
 // Main Organisation + KYC Schema
 // ----------------------------
 const OrganisationSchema = new mongoose.Schema({
+
   // Organisation Info
-  name: { type: String, required: true, trim: true },
+  CompanyName: { type: String, required: true, trim: true },
   businessEmail: { 
     type: String, 
     required: true, 
     trim: true,
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Invalid email format"]
   },
+
   typeOfOrganisation: {
     type: String,
     enum: ["private", "public", "proprietory", "partnership", "startup", "ltp", "pvt ltd", "opc pvt ltd", "other"],
@@ -300,10 +407,41 @@ const OrganisationSchema = new mongoose.Schema({
     type: String, 
     trim: true,
     required: function() {
-      // Conditionally required for certain organisation types
       return ["pvt ltd", "opc pvt ltd", "private"].includes(this.typeOfOrganisation);
     }
   },
+
+  // ----------------------------
+  // 👉 Added Fields Here
+  // ----------------------------
+
+  gstNumber: { 
+    type: String, 
+    required: true, 
+    trim: true 
+  },
+
+  gstProof: { 
+    type: DocumentSchema, 
+    required: true 
+  },
+
+  businessNumber: { 
+    type: String, 
+    trim: true 
+  },
+
+  businessWebsite: { 
+    type: String, 
+    trim: true 
+  },
+
+  linkedin: { 
+    type: String, 
+    trim: true 
+  },
+
+  // ----------------------------
 
   // KYC Documents
   directorPan: { type: DocumentSchema, required: true },
@@ -335,7 +473,6 @@ const OrganisationSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// Index for quick lookup of pending KYC
 OrganisationSchema.index({ status: 1 });
 
 export default mongoose.models.Organisation || mongoose.model("Organisation", OrganisationSchema);

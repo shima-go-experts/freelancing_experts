@@ -212,6 +212,212 @@
 // }
 
 
+// import { NextResponse } from "next/server";
+// import mongoose from "mongoose";
+// import dbConnect from "@/app/helper/dbConnect";
+// import Organisation from "@/app/model/Organisation";
+// import { uploadFile } from "@/app/utils/cloudinary";
+
+// // Upload single file
+// const uploadSingle = async (file, folder) => {
+//   if (!file) return null;
+//   const upload = await uploadFile(file, folder);
+//   return { url: upload.url, public_id: upload.public_id };
+// };
+
+// // Upload front + back
+// const uploadDouble = async (front, back, folder) => {
+//   const f = front ? await uploadSingle(front, folder) : null;
+//   const b = back ? await uploadSingle(back, folder) : null;
+
+//   return {
+//     front: f?.url || null,
+//     back: b?.url || null,
+//     front_public_id: f?.public_id || null,
+//     back_public_id: b?.public_id || null
+//   };
+// };
+
+// export async function POST(req) {
+//   let session;
+//   try {
+//     await dbConnect();
+//     session = await mongoose.startSession();
+//     session.startTransaction();
+
+//     const form = await req.formData();
+
+
+    
+
+//     // Basic organisation fields
+//      const name = form.get("name");
+//     const businessEmail = form.get("businessEmail");
+
+// // Duplicate email check
+// const existingEmail = await Organisation.findOne({ businessEmail }).session(session);
+// if (existingEmail) {
+//   await session.abortTransaction();
+//   session.endSession();
+//   return NextResponse.json({
+//     success: false,
+//     message: `Business email "${businessEmail}" already exists.`,
+//   }, { status: 400 });
+// }
+
+
+
+//     const typeOfOrganisation = form.get("typeOfOrganisation");
+//     const registrationNumber = form.get("registrationNumber") || null;
+
+//     // Check if registrationNumber already exists
+// if (registrationNumber) {
+//   const existingOrg = await Organisation.findOne({ registrationNumber }).session(session);
+//   if (existingOrg) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     return NextResponse.json({
+//       success: false,
+//       message: `Registration number "${registrationNumber}" already exists.`,
+//     }, { status: 400 });
+//   }
+// }
+
+
+//     // Required checks
+//     if (!name || !businessEmail || !typeOfOrganisation) {
+//       return NextResponse.json(
+//         { success: false, message: "Name, businessEmail & typeOfOrganisation are required." },
+//         { status: 400 }
+//       );
+//     }
+
+//     // Address
+//     const employerAddress = {
+//       addressLine1: form.get("addressLine1"),
+//       addressLine2: form.get("addressLine2") || "",
+//       city: form.get("city"),
+//       state: form.get("state"),
+//       country: form.get("country"),
+//       pincode: form.get("pincode"),
+//     };
+
+//     // Mandatory uploads
+//     const directorPan = await uploadDouble(
+//       form.get("directorPanFront"),
+//       form.get("directorPanBack"),
+//       "kyc/director/pan"
+//     );
+
+//     const logo = await uploadSingle(form.get("logo"), "kyc/logo");
+//     const employerAddressProof = await uploadSingle(form.get("addressProof"), "kyc/addressProof");
+
+//     if (!directorPan.front || !directorPan.back) {
+//       return NextResponse.json(
+//         { success: false, message: "Director PAN front & back required" },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!logo) {
+//       return NextResponse.json(
+//         { success: false, message: "Company logo required" },
+//         { status: 400 }
+//       );
+//     }
+
+//     if (!employerAddressProof) {
+//       return NextResponse.json(
+//         { success: false, message: "Employer address proof required" },
+//         { status: 400 }
+//       );
+//     }
+
+//     // Optional docs
+//     const directorDl = await uploadDouble(
+//       form.get("directorDlFront"),
+//       form.get("directorDlBack"),
+//       "kyc/director/dl"
+//     );
+
+//     const directorAadhar = await uploadDouble(
+//       form.get("directorAadharFront"),
+//       form.get("directorAadharBack"),
+//       "kyc/director/aadhar"
+//     );
+
+//     const directorPassport = await uploadDouble(
+//       form.get("directorPassportFront"),
+//       form.get("directorPassportBack"),
+//       "kyc/director/passport"
+//     );
+
+//     // Company photos
+//     const companyPhotos = [];
+//     for (const key of form.keys()) {
+//       if (key.startsWith("companyPhoto")) {
+//         const uploaded = await uploadSingle(form.get(key), "kyc/company/photos");
+//         companyPhotos.push(uploaded);
+//       }
+//     }
+
+//     // Final payload saved into Organisation
+//     const payload = {
+//       name,
+//       businessEmail,
+//       typeOfOrganisation,
+//       registrationNumber,
+//       employerAddress,
+//       directorPan,
+//       directorDl,
+//       directorAadhar,
+//       directorPassport,
+//       logo,
+//       employerAddressProof,
+//       companyPhotos,
+//       status: "pending",
+//       rejectionReason: null
+//     };
+
+//     const org = await Organisation.create([payload], { session });
+
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     return NextResponse.json({
+//       success: true,
+//       message: "Organisation KYC submitted successfully",
+//       data: org[0],
+//     });
+
+//   } catch (err) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+//   }
+// }
+
+// export async function GET() {
+//   try {
+//     await dbConnect();
+
+//     const organisations = await Organisation.find().sort({ createdAt: -1 });
+
+//     return NextResponse.json({
+//       success: true,
+//       message: "All organisations fetched successfully",
+//       data: organisations,
+//     });
+
+//   } catch (err) {
+//     return NextResponse.json(
+//       { success: false, message: err.message },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "@/app/helper/dbConnect";
@@ -247,47 +453,43 @@ export async function POST(req) {
 
     const form = await req.formData();
 
-
-    
-
     // Basic organisation fields
-     const name = form.get("name");
+    const CompanyName = form.get("CompanyName");
     const businessEmail = form.get("businessEmail");
 
-// Duplicate email check
-const existingEmail = await Organisation.findOne({ businessEmail }).session(session);
-if (existingEmail) {
-  await session.abortTransaction();
-  session.endSession();
-  return NextResponse.json({
-    success: false,
-    message: `Business email "${businessEmail}" already exists.`,
-  }, { status: 400 });
-}
-
-
+    // Duplicate email check
+    const existingEmail = await Organisation.findOne({ businessEmail }).session(session);
+    if (existingEmail) {
+      return NextResponse.json({
+        success: false,
+        message: `Business email "${businessEmail}" already exists.`,
+      }, { status: 400 });
+    }
 
     const typeOfOrganisation = form.get("typeOfOrganisation");
     const registrationNumber = form.get("registrationNumber") || null;
 
-    // Check if registrationNumber already exists
-if (registrationNumber) {
-  const existingOrg = await Organisation.findOne({ registrationNumber }).session(session);
-  if (existingOrg) {
-    await session.abortTransaction();
-    session.endSession();
-    return NextResponse.json({
-      success: false,
-      message: `Registration number "${registrationNumber}" already exists.`,
-    }, { status: 400 });
-  }
-}
+    // Check duplicate registration number
+    if (registrationNumber) {
+      const existingOrg = await Organisation.findOne({ registrationNumber }).session(session);
+      if (existingOrg) {
+        return NextResponse.json({
+          success: false,
+          message: `Registration number "${registrationNumber}" already exists.`,
+        }, { status: 400 });
+      }
+    }
 
+    // NEW FIELDS
+    const gstNumber = form.get("gstNumber");
+    const businessNumber = form.get("businessNumber") || "";
+    const businessWebsite = form.get("businessWebsite") || "";
+    const linkedin = form.get("linkedin") || "";
 
-    // Required checks
-    if (!name || !businessEmail || !typeOfOrganisation) {
+    // Required text validation
+    if (!CompanyName || !businessEmail || !typeOfOrganisation || !gstNumber) {
       return NextResponse.json(
-        { success: false, message: "Name, businessEmail & typeOfOrganisation are required." },
+        { success: false, message: "CompanyName, businessEmail, typeOfOrganisation & gstNumber are required." },
         { status: 400 }
       );
     }
@@ -309,12 +511,26 @@ if (registrationNumber) {
       "kyc/director/pan"
     );
 
+    const gstProof = await uploadDouble(
+      form.get("gstProofFront"),
+      form.get("gstProofBack"),
+      "kyc/gst"
+    );
+
     const logo = await uploadSingle(form.get("logo"), "kyc/logo");
     const employerAddressProof = await uploadSingle(form.get("addressProof"), "kyc/addressProof");
 
+    // Mandatory validation checks
     if (!directorPan.front || !directorPan.back) {
       return NextResponse.json(
         { success: false, message: "Director PAN front & back required" },
+        { status: 400 }
+      );
+    }
+
+    if (!gstProof.front || !gstProof.back) {
+      return NextResponse.json(
+        { success: false, message: "GST Proof front & back required" },
         { status: 400 }
       );
     }
@@ -352,21 +568,28 @@ if (registrationNumber) {
       "kyc/director/passport"
     );
 
-    // Company photos
+    // Company photos (multiple)
     const companyPhotos = [];
     for (const key of form.keys()) {
       if (key.startsWith("companyPhoto")) {
         const uploaded = await uploadSingle(form.get(key), "kyc/company/photos");
-        companyPhotos.push(uploaded);
+        if (uploaded) companyPhotos.push(uploaded);
       }
     }
 
-    // Final payload saved into Organisation
+    // PAYLOAD EXACTLY MATCHES YOUR SCHEMA
     const payload = {
-      name,
+      CompanyName,
       businessEmail,
       typeOfOrganisation,
       registrationNumber,
+
+      gstNumber,
+      gstProof,
+      businessNumber,
+      businessWebsite,
+      linkedin,
+
       employerAddress,
       directorPan,
       directorDl,
@@ -375,10 +598,12 @@ if (registrationNumber) {
       logo,
       employerAddressProof,
       companyPhotos,
+
       status: "pending",
       rejectionReason: null
     };
 
+    // CREATE
     const org = await Organisation.create([payload], { session });
 
     await session.commitTransaction();
@@ -391,8 +616,10 @@ if (registrationNumber) {
     });
 
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
+    if (session) {
+      await session.abortTransaction();
+      session.endSession();
+    }
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
 }
