@@ -278,6 +278,7 @@ const addCorsHeaders = (res) => {
 const PUBLIC_ROUTES = [
   /^\/api\/admin\/login/,
   /^\/api\/admin\/register/,
+   /^\/api\/admin\/admincategories/,
   /^\/api\/client\/login/,
   /^\/api\/client\/register/,
    /^\/api\/users\/register/,
