@@ -290,6 +290,8 @@ const PUBLIC_ROUTES = [
     /^\/api\/organisation\/profile/,
   /^\/api\/admin\/changePassword/,
 /^\/api\/client/,
+/^\/api\/send-otp/,
+/^\/api\/verify-otp/,
 /^\/api\/projects/,
   // ✅ Make categories public
   /^\/api\/admin\/categories/,
@@ -349,3 +351,4 @@ export default async function middleware(req) {
     );
   }
 }
+
