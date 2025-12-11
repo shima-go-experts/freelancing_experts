@@ -341,16 +341,20 @@
 
 // export default mongoose.models.Organisation || mongoose.model("Organisation", OrganisationSchema);
 
+
+
+
+
  import mongoose from "mongoose";
 
 // ----------------------------
 // Sub-schema for Documents
 // ----------------------------
 const DocumentSchema = new mongoose.Schema({
-  front: { type: String, required: true, trim: true },
-  back: { type: String, required: true, trim: true },
-  front_public_id: { type: String, required: true, trim: true },
-  back_public_id: { type: String, required: true, trim: true }
+  front: { type: String, required: false, trim: true },
+  back: { type: String, required: false, trim: true },
+  front_public_id: { type: String, required: false, trim: true },
+  back_public_id: { type: String, required: false, trim: true }
 });
 
 // ----------------------------
@@ -367,20 +371,20 @@ const OptionalDocumentSchema = new mongoose.Schema({
 // Sub-schema for Address
 // ----------------------------
 const AddressSchema = new mongoose.Schema({
-  addressLine1: { type: String, required: true, trim: true },
+  addressLine1: { type: String, required: false, trim: true },
   addressLine2: { type: String, trim: true },
-  city: { type: String, required: true, trim: true },
-  state: { type: String, required: true, trim: true },
-  country: { type: String, required: true, trim: true },
-  pincode: { type: String, required: true, trim: true }
+  city: { type: String, required: false, trim: true },
+  state: { type: String, required: false, trim: true },
+  country: { type: String, required: false, trim: true },
+  pincode: { type: String, required: false, trim: true }
 });
 
 // ----------------------------
 // Sub-schema for Images
 // ----------------------------
 const ImageSchema = new mongoose.Schema({
-  url: { type: String, required: true, trim: true },
-  public_id: { type: String, required: true, trim: true },
+  url: { type: String, required: false, trim: true },
+  public_id: { type: String, required: false, trim: true },
   uploadedAt: { type: Date, default: Date.now }
 });
 
@@ -390,10 +394,10 @@ const ImageSchema = new mongoose.Schema({
 const OrganisationSchema = new mongoose.Schema({
 
   // Organisation Info
-  CompanyName: { type: String, required: true, trim: true },
+  CompanyName: { type: String, required: false, trim: true },
   businessEmail: { 
     type: String, 
-    required: true, 
+    required: false, 
     trim: true,
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Invalid email format"]
   },
@@ -401,7 +405,7 @@ const OrganisationSchema = new mongoose.Schema({
   typeOfOrganisation: {
     type: String,
     enum: ["private", "public", "proprietory", "partnership", "startup", "ltp", "pvt ltd", "opc pvt ltd", "other"],
-    required: true
+    required: false
   },
   registrationNumber: { 
     type: String, 
@@ -417,13 +421,13 @@ const OrganisationSchema = new mongoose.Schema({
 
   gstNumber: { 
     type: String, 
-    required: true, 
+    required: false, 
     trim: true 
   },
 
   gstProof: { 
     type: DocumentSchema, 
-    required: true 
+    required: false
   },
 
   businessNumber: { 
@@ -462,10 +466,10 @@ const OrganisationSchema = new mongoose.Schema({
   },
 
   // Employer Address
-  employerAddress: { type: AddressSchema, required: true },
+  employerAddress: { type: AddressSchema, required: false },
 
   // Employer Address Proof (required for KYC)
-  employerAddressProof: { type: ImageSchema, required: true },
+  employerAddressProof: { type: ImageSchema, required: false },
 
   // Status & Rejection Reason
   status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },

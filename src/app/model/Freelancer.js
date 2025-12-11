@@ -154,6 +154,8 @@ const FreelancerProfileSchema = new mongoose.Schema({
   portfolio_website: { type: String, trim: true },
   full_address: { type: String, trim: true },
 
+  
+
   // =========================
   // KYC DOCUMENTS
   // =========================

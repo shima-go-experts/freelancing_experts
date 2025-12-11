@@ -84,10 +84,10 @@ export async function GET() {
 export async function POST(req) {
   await dbConnect();
   const body = await req.json();
-  const { categoryId, name, description } = body;
+  const { categoryId, SubcategoryName, description } = body;
 
   // Basic validation
-  if (!categoryId || !name) {
+  if (!categoryId || !SubcategoryName) {
     return NextResponse.json(
       { success: false, message: "categoryId & name required" },
       { status: 400 }
@@ -120,11 +120,11 @@ export async function POST(req) {
 
   // === Create Subcategory ===
   try {
-    const slug = generateSlug(name);
+    const slug = generateSlug(SubcategoryName);
 
     const sub = await Subcategory.create({
       categoryId,
-      name,
+    SubcategoryName  ,
       description,
       slug,
     });
