@@ -127,89 +127,83 @@
 
 
 
-
-
 import mongoose from "mongoose";
 
-const UserSchema = new mongoose.Schema(
-  {
-    firstName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+const FreelancerProfileSchema = new mongoose.Schema(
+  {
+    // =========================
+    // LINK TO USER ACCOUNT
+    // =========================
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-    middleName: {
-      type: String,
-      trim: true,
-      default: null,
-    },
+    // =========================
+    // BASIC PROFILE
+    // =========================
+    full_name: { type: String, required: false, trim: true },
+    email: { type: String, required: false, lowercase: true, trim: true },
+    // freelancer_photo: { type: String, trim: true },
 
-    lastName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    bio: { type: String, trim: true },
+    skills: [{ type: String, trim: true }],
+    experience_years: { type: Number, default: 0, min: 0 },
+    hourly_rate: { type: Number, default: 0, min: 0 },
 
-    mobileNo: {
-      type: String,
-      required: true,
-      trim: true,
-      unique: true,
-      match: [/^[0-9]{10}$/, "Invalid mobile number"],
-    },
+    linkedin_url: { type: String, trim: true },
+    portfolio_website: { type: String, trim: true },
+    full_address: { type: String, trim: true },
 
-    altMobileOrWhatsApp: {
-      type: String,
-      trim: true,
-      default: null,
-      match: [/^[0-9]{10}$/, "Invalid alternate number"],
-    },
+    // =========================
+    // CATEGORIES & SUBCATEGORIES
+    // =========================
+    categories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+        required: false,
+      },
+    ],
 
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        "Invalid email format",
-      ],
-    },
+    subcategories: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subcategory",
+        required: false,
+      },
+    ],
 
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-    },
+    // =========================
+    // KYC DOCUMENTS
+    // =========================
+    aadhar_or_passport_number: { type: String, trim: true },
+    aadhar_or_passport_front: { type: String },
+    aadhar_or_passport_back: { type: String },
 
-    // --- START: FIELDS FOR FORGOT PASSWORD ---
-    resetPasswordToken: {
+    pan_or_dl_number: { type: String, trim: true },
+    pan_or_driving_license_front: { type: String },
+    pan_or_driving_license_back: { type: String },
+
+    selfie_url: { type: String, required: false },
+
+    experience_certificates: { type: [String], required: false },
+
+    kyc_status: {
       type: String,
-      select: false, // Ensures token is not sent in normal queries
+      enum: ["Pending", "Verified", "Rejected"],
+      default: "Pending",
     },
-    resetPasswordExpires: {
-      type: Date,
-      select: false, // Ensures expiration is not sent in normal queries
-    },
-    // --- END: FIELDS FOR FORGOT PASSWORD ---
 
-    role: {
-      type: String,
-      required: true,
-      enum: ["admin", "organization", "client", "freelancer", "user"],
-      default: "user",
-    },
-
-    status: {
-      type: String,
-      enum: ["active", "blocked", "deleted"],
-      default: "active",
-    },
-  },
-  { timestamps: true }
+    // =========================
+    // RATINGS
+    // =========================
+    rating_average: { type: Number, default: 0, min: 0, max: 5 },
+    rating_count: { type: Number, default: 0, min: 0 },
+  },
+  { timestamps: true }
 );
 
-export default mongoose.models.User ||
-  mongoose.model("User", UserSchema);
+export default mongoose.models.FreelancerProfile ||
+  mongoose.model("FreelancerProfile", FreelancerProfileSchema);

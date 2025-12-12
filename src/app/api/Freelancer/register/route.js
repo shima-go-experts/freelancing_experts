@@ -332,7 +332,7 @@ export async function POST(req) {
     // Validate mandatory uploads
     // -----------------------------
     if (
-      !freelancer_photo ||
+      // !freelancer_photo ||
       !aadhar_or_passport.front ||
       !aadhar_or_passport.back ||
       !pan_or_dl.front ||

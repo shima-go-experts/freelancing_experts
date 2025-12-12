@@ -84,14 +84,14 @@ export async function PUT(req, context) {
     };
 
     // File uploads
-    const freelancer_photo = await uploadSingle(
-      form.get("freelancer_photo"),
-      "freelancer/photo"
-    );
+    // const freelancer_photo = await uploadSingle(
+    //   form.get("freelancer_photo"),
+    //   "freelancer/photo"
+    // );
 
-    if (freelancer_photo) {
-      payload.freelancer_photo = freelancer_photo.url;
-    }
+    // if (freelancer_photo) {
+    //   payload.freelancer_photo = freelancer_photo.url;
+    // }
 
     const aadhar = await uploadDouble(
       form.get("aadhar_or_passport_front"),

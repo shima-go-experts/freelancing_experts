@@ -132,6 +132,7 @@
 
 
 
+
 import mongoose from "mongoose";
 
 const FreelancerProfileSchema = new mongoose.Schema({
@@ -158,12 +159,12 @@ const FreelancerProfileSchema = new mongoose.Schema({
   // KYC DOCUMENTS
   // =========================
   aadhar_or_passport_number: { type: String, trim: true },
-  aadhar_or_passport_front: { type: String, required: false },
-  aadhar_or_passport_back: { type: String, required: false },
+  aadhar_or_passport_front: { type: String },
+  aadhar_or_passport_back: { type: String },
 
   pan_or_dl_number: { type: String, trim: true },
-  pan_or_driving_license_front: { type: String, required: false },
-  pan_or_driving_license_back: { type: String, required: false },
+  pan_or_driving_license_front: { type: String, },
+  pan_or_driving_license_back: { type: String,  },
 
   selfie_url: { type: String, required: false },
 
