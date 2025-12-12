@@ -277,6 +277,7 @@ const addCorsHeaders = (res) => {
 // ⛔ Public routes (NO AUTH NEEDED)
 const PUBLIC_ROUTES = [
   /^\/api\/admin\/login/,
+   /^\/api\/users\/login/,
   /^\/api\/admin\/register/,
    /^\/api\/admin\/admincategories/,
   /^\/api\/client\/login/,

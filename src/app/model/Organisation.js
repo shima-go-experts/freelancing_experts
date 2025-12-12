@@ -448,13 +448,13 @@ const OrganisationSchema = new mongoose.Schema({
   // ----------------------------
 
   // KYC Documents
-  directorPan: { type: DocumentSchema, required: true },
+  directorPan: { type: DocumentSchema, required: false },
   directorAadhar: { type: OptionalDocumentSchema },
   directorDl: { type: OptionalDocumentSchema },
   directorPassport: { type: OptionalDocumentSchema },
 
   // Company Logo (required for KYC)
-  logo: { type: ImageSchema, required: true },
+  logo: { type: ImageSchema, required: false },
 
   // Company Photos (Max 10)
   companyPhotos: { 

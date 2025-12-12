@@ -51,76 +51,165 @@
 
 
 
+// import mongoose from "mongoose";
+
+// const UserSchema = new mongoose.Schema(
+//   {
+//     firstName: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     middleName: {
+//       type: String,
+//       trim: true,
+//       default: null,
+//     },
+
+//     lastName: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     mobileNo: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//       unique: true,
+//       match: [/^[0-9]{10}$/, "Invalid mobile number"],
+//     },
+
+//     altMobileOrWhatsApp: {
+//       type: String,
+//       trim: true,
+//       default: null,
+//       match: [/^[0-9]{10}$/, "Invalid alternate number"],
+//     },
+
+//     email: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       lowercase: true,
+//       trim: true,
+//       match: [
+//         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+//         "Invalid email format",
+//       ],
+//     },
+
+//     password: {
+//       type: String,
+//       required: true,
+//       minlength: 6,
+//     },
+
+//     role: {
+//       type: String,
+//       required: true,
+//       enum: ["admin", "organization", "client", "freelancer", "user"],
+//       default: "user",
+//     },
+
+//     status: {
+//       type: String,
+//       enum: ["active", "blocked", "deleted"],
+//       default: "active",
+//     },
+//   },
+//   { timestamps: true }
+// );
+
+// export default mongoose.models.User ||
+//   mongoose.model("User", UserSchema);
+
+
+
+
+
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
-  {
-    firstName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+  {
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    middleName: {
-      type: String,
-      trim: true,
-      default: null,
-    },
+    middleName: {
+      type: String,
+      trim: true,
+      default: null,
+    },
 
-    lastName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    mobileNo: {
-      type: String,
-      required: true,
-      trim: true,
-      unique: true,
-      match: [/^[0-9]{10}$/, "Invalid mobile number"],
-    },
+    mobileNo: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      match: [/^[0-9]{10}$/, "Invalid mobile number"],
+    },
 
-    altMobileOrWhatsApp: {
-      type: String,
-      trim: true,
-      default: null,
-      match: [/^[0-9]{10}$/, "Invalid alternate number"],
-    },
+    altMobileOrWhatsApp: {
+      type: String,
+      trim: true,
+      default: null,
+      match: [/^[0-9]{10}$/, "Invalid alternate number"],
+    },
 
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        "Invalid email format",
-      ],
-    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Invalid email format",
+      ],
+    },
 
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
 
-    role: {
+    // --- START: FIELDS FOR FORGOT PASSWORD ---
+    resetPasswordToken: {
       type: String,
-      required: true,
-      enum: ["admin", "organization", "client", "freelancer", "user"],
-      default: "user",
+      select: false, // Ensures token is not sent in normal queries
     },
+    resetPasswordExpires: {
+      type: Date,
+      select: false, // Ensures expiration is not sent in normal queries
+    },
+    // --- END: FIELDS FOR FORGOT PASSWORD ---
 
-    status: {
-      type: String,
-      enum: ["active", "blocked", "deleted"],
-      default: "active",
-    },
-  },
-  { timestamps: true }
+    role: {
+      type: String,
+      required: true,
+      enum: ["admin", "organization", "client", "freelancer", "user"],
+      default: "user",
+    },
+
+    status: {
+      type: String,
+      enum: ["active", "blocked", "deleted"],
+      default: "active",
+    },
+  },
+  { timestamps: true }
 );
 
 export default mongoose.models.User ||
-  mongoose.model("User", UserSchema);
+  mongoose.model("User", UserSchema);

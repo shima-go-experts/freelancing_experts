@@ -43,12 +43,22 @@ export async function POST(req) {
     });
 
     // Send email
-    await transporter.sendMail({
-      from: `"DoorstepHub" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP is: ${otp}. It will expire in 5 minutes.`,
-    });
+       await transporter.sendMail({
+          from: `"DoorstepHub" <${process.env.EMAIL_USER}>`,
+          to: email,
+          subject: "Your OTP Code",
+          text: `Your OTP is: ${otp}. It will expire in 5 minutes.`,
+        })
+        .then((info) => {
+          console.log(" Email sent successfully!");
+          console.log("Message ID:", info.messageId);
+          console.log("Response from SMTP server:", info.response);
+        })
+        .catch((err) => {
+          console.error(" Error sending email:");
+          console.error(err);
+        });
+
 
     return NextResponse.json({
       success: true,

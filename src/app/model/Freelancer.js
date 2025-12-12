@@ -52,8 +52,6 @@
 
 
 
-
-
 // import mongoose from "mongoose";
 
 // const FreelancerSchema = new mongoose.Schema(
@@ -167,7 +165,7 @@ const FreelancerProfileSchema = new mongoose.Schema({
   pan_or_driving_license_front: { type: String, required: false },
   pan_or_driving_license_back: { type: String, required: false },
 
-  selfie_url: { type: String, required: true },
+  selfie_url: { type: String, required: false },
 
   experience_certificates: { type: [String], required: false},
 
