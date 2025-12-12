@@ -141,8 +141,8 @@ const FreelancerProfileSchema = new mongoose.Schema({
   // =========================
   // BASIC PROFILE
   // =========================
-  full_name: { type: String, required: true, trim: true },
-  email: { type: String, required: true, lowercase: true, trim: true },
+  full_name: { type: String, required: false, trim: true },
+  email: { type: String, required: false, lowercase: true, trim: true },
   freelancer_photo: { type: String, trim: true },
 
   bio: { type: String, trim: true },
@@ -160,16 +160,16 @@ const FreelancerProfileSchema = new mongoose.Schema({
   // KYC DOCUMENTS
   // =========================
   aadhar_or_passport_number: { type: String, trim: true },
-  aadhar_or_passport_front: { type: String, required: true },
-  aadhar_or_passport_back: { type: String, required: true },
+  aadhar_or_passport_front: { type: String, required: false },
+  aadhar_or_passport_back: { type: String, required: false },
 
   pan_or_dl_number: { type: String, trim: true },
-  pan_or_driving_license_front: { type: String, required: true },
-  pan_or_driving_license_back: { type: String, required: true },
+  pan_or_driving_license_front: { type: String, required: false },
+  pan_or_driving_license_back: { type: String, required: false },
 
   selfie_url: { type: String, required: true },
 
-  experience_certificates: { type: [String], required: true },
+  experience_certificates: { type: [String], required: false},
 
   kyc_status: {
     type: String,
