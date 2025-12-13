@@ -414,3 +414,21 @@ export async function POST(req) {
     );
   }
 }
+
+// =========================
+// GET ALL FREELANCERS
+// =========================
+export async function GET() {
+  try {
+    await dbConnect();
+    const freelancers = await FreelancerProfile.find().sort({ createdAt: -1 });
+
+    return NextResponse.json(
+      { success: true, data: freelancers },
+      { status: 200 }
+    );
+
+  } catch (error) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
