@@ -240,6 +240,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/app/helper/dbConnect";
 import FreelancerProfile from "@/app/model/FreelancerProfile";
 import { uploadFile } from "@/app/utils/cloudinary";
+import mongoose from "mongoose";
 
 // =========================
 // File upload helpers
@@ -267,11 +268,10 @@ const uploadDouble = async (front, back, folder) => {
 export async function POST(req) {
   try {
     await dbConnect();
-
     const form = await req.formData();
 
     // -----------------------------
-    // Basic Fields
+    // BASIC FIELDS
     // -----------------------------
     const full_name = form.get("full_name");
     const email = form.get("email");
@@ -284,24 +284,45 @@ export async function POST(req) {
     const full_address = form.get("full_address") || "";
 
     // -----------------------------
-    // KYC Numbers
+    // REFERENCES (IMPORTANT)
+    // -----------------------------
+    const User = form.get("User");
+    const categories = form.getAll("categories");
+    const subcategories = form.getAll("subcategories");
+
+    if (!User || !mongoose.Types.ObjectId.isValid(User)) {
+      return NextResponse.json(
+        { success: false, message: "Valid user ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!categories.length) {
+      return NextResponse.json(
+        { success: false, message: "At least one category is required" },
+        { status: 400 }
+      );
+    }
+
+    // -----------------------------
+    // KYC NUMBERS
     // -----------------------------
     const aadhar_or_passport_number = form.get("aadhar_or_passport_number") || "";
     const pan_or_dl_number = form.get("pan_or_dl_number") || "";
 
     // -----------------------------
-    // Check email uniqueness
+    // EMAIL UNIQUE CHECK
     // -----------------------------
     const exists = await FreelancerProfile.findOne({ email });
     if (exists) {
-      return NextResponse.json({
-        success: false,
-        message: "Email already registered"
-      }, { status: 409 });
+      return NextResponse.json(
+        { success: false, message: "Email already registered" },
+        { status: 409 }
+      );
     }
 
     // -----------------------------
-    // Upload Files
+    // FILE UPLOADS
     // -----------------------------
     const freelancer_photo = await uploadSingle(form.get("freelancer_photo"), "freelancer/photo");
 
@@ -317,9 +338,11 @@ export async function POST(req) {
       "freelancer/kyc/pan_dl"
     );
 
-    const selfie_url = await uploadSingle(form.get("selfie_url"), "freelancer/kyc/selfie");
+    const selfie = await uploadSingle(form.get("selfie_url"), "freelancer/kyc/selfie");
 
-    // Multiple certificates
+    // -----------------------------
+    // EXPERIENCE CERTIFICATES
+    // -----------------------------
     const experience_certificates = [];
     for (const key of form.keys()) {
       if (key.startsWith("experience_certificate")) {
@@ -329,30 +352,33 @@ export async function POST(req) {
     }
 
     // -----------------------------
-    // Validate mandatory uploads
+    // VALIDATION
     // -----------------------------
     if (
-      // !freelancer_photo ||
       !aadhar_or_passport.front ||
       !aadhar_or_passport.back ||
       !pan_or_dl.front ||
       !pan_or_dl.back ||
-      !selfie_url ||
+      !selfie ||
       experience_certificates.length === 0
     ) {
-      return NextResponse.json({
-        success: false,
-        message: "All KYC documents, selfie, photo, and at least one experience certificate are required"
-      }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "All KYC documents, selfie and certificates are required" },
+        { status: 400 }
+      );
     }
 
     // -----------------------------
-    // Save Freelancer
+    // SAVE FREELANCER
     // -----------------------------
     const payload = {
+      User,
+      categories,
+      subcategories,
+
       full_name,
       email,
-      // freelancer_photo: freelancer_photo.url,
+      freelancer_photo: freelancer_photo?.url || null,
       bio,
       skills,
       experience_years,
@@ -369,45 +395,22 @@ export async function POST(req) {
       pan_or_driving_license_front: pan_or_dl.front,
       pan_or_driving_license_back: pan_or_dl.back,
 
-      selfie_url: selfie_url.url,
+      selfie_url: selfie.url,
       experience_certificates,
       kyc_status: "Pending"
     };
 
     const freelancer = await FreelancerProfile.create(payload);
 
-    return NextResponse.json({
-      success: true,
-      message: "Freelancer registered successfully",
-      data: freelancer
-    }, { status: 201 });
-
-  } catch (error) {
-    return NextResponse.json({
-      success: false,
-      message: error.message
-    }, { status: 500 });
-  }
-}
-
-// =========================
-// GET ALL FREELANCERS
-// =========================
-export async function GET() {
-  try {
-    await dbConnect();
-    const freelancers = await FreelancerProfile.find().sort({ createdAt: -1 });
-
     return NextResponse.json(
-      { success: true, data: freelancers },
-      { status: 200 }
+      { success: true, message: "Freelancer registered successfully", data: freelancer },
+      { status: 201 }
     );
 
   } catch (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
   }
 }
-
-
-//
-

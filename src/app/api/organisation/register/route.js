@@ -481,6 +481,7 @@ export async function POST(req) {
     }
 
     // NEW FIELDS
+    const User=form.get("User")
     const gstNumber = form.get("gstNumber");
     const businessNumber = form.get("businessNumber") || "";
     const businessWebsite = form.get("businessWebsite") || "";
@@ -583,7 +584,7 @@ export async function POST(req) {
       businessEmail,
       typeOfOrganisation,
       registrationNumber,
-
+      User,
       gstNumber,
       gstProof,
       businessNumber,

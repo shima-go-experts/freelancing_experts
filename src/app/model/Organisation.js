@@ -445,6 +445,13 @@ const OrganisationSchema = new mongoose.Schema({
     trim: true 
   },
 
+ User: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
+
+
   // ----------------------------
 
   // KYC Documents
