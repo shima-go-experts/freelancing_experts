@@ -352,7 +352,7 @@ export async function POST(req) {
     const payload = {
       full_name,
       email,
-      freelancer_photo: freelancer_photo.url,
+      // freelancer_photo: freelancer_photo.url,
       bio,
       skills,
       experience_years,
